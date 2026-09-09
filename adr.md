@@ -7,11 +7,11 @@ The Internship Intelligence Agent aims to automate the discovery, verification, 
 
 1. **Local-first**
    - *Why*: Privacy, control over data, and to minimize cloud dependency/costs.
-   - *Impact*: We rely on local LLMs (Ollama) and local services via Docker instead of third-party cloud APIs (e.g., OpenAI, AWS).
+   - *Impact*: We rely on local services via Docker instead of most third-party cloud APIs. Exception: LLM capabilities are handled via free API tiers to reduce local compute requirements.
 
 2. **Zero-cost**
    - *Why*: The system should run continuously for free.
-   - *Impact*: Open-source tooling exclusively (PostgreSQL, Redis, local LLMs). Rate limiting and intelligent caching must be implemented aggressively to avoid getting blocked by free tier services or sources, reducing the need for paid proxies where possible.
+   - *Impact*: Open-source tooling for infrastructure (PostgreSQL, Redis) and free-tier APIs for models (Gemini, OpenRouter free models). Rate limiting and intelligent caching must be implemented aggressively to avoid getting blocked by free tier services or sources, reducing the need for paid proxies where possible.
 
 3. **Explicit Human-in-the-Loop**
    - *Why*: AI should augment the human, not act autonomously to the point of sending emails or submitting applications. This avoids reputational damage.
@@ -35,8 +35,8 @@ The Internship Intelligence Agent aims to automate the discovery, verification, 
 4. **Background Jobs / Cache**: Redis
    - *Why*: Essential for caching expensive web requests (Phase 5) and managing background tasks/queues.
 
-5. **AI / LLM**: Ollama
-   - *Why*: Local LLM execution ensures privacy and zero cost.
+5. **AI / LLM**: Free APIs (Gemini / OpenRouter)
+   - *Why*: Offloading LLM execution to free-tier cloud APIs ensures zero cost while reducing the heavy local compute requirements of running models via Ollama.
 
 6. **Web Research**: Playwright + BeautifulSoup
    - *Why*: Playwright can render JS-heavy pages (crucial for modern startup websites), while BeautifulSoup handles lightweight static parsing.

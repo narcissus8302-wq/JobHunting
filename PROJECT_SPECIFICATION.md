@@ -110,14 +110,13 @@ For each qualified opportunity, the system produces:
 *(Other entities include User, Role, Source, ResearchRun, Resume, ResumeVersion, Outreach)*
 
 ## System Architecture (Local Infrastructure)
-Stack: Python, FastAPI, PostgreSQL, SQLAlchemy, Pydantic, Redis, Docker, React, Vite, Ollama, Playwright, BeautifulSoup, LaTeX.
+Stack: Python, FastAPI, PostgreSQL, SQLAlchemy, Pydantic, Redis, Docker, React, Vite, Gemini / OpenRouter (free APIs), Playwright, BeautifulSoup, LaTeX.
 
 Services (`docker-compose`):
 * backend (FastAPI)
 * frontend (React/Vite)
 * postgres
 * redis
-* ollama
 
 ## Phases (32 Total)
 ### R1 Foundation
