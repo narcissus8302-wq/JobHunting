@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey, Text
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -20,8 +20,8 @@ class Company(Base):
     funding_total = Column(String)
     reliability_score = Column(Float)
     status = Column(String, default="DISCOVERED")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     people = relationship("Person", back_populates="company")
     opportunities = relationship("Opportunity", back_populates="company")
@@ -60,8 +60,8 @@ class Opportunity(Base):
     overall_score = Column(Float)
 
     status = Column(String, default="IDENTIFIED")
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     company = relationship("Company", back_populates="opportunities")
     person = relationship("Person", back_populates="opportunities")
@@ -75,5 +75,5 @@ class Evidence(Base):
     claim = Column(Text, nullable=False)
     source_url = Column(String)
     source_type = Column(String)
-    retrieved_at = Column(DateTime, default=datetime.utcnow)
+    retrieved_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     confidence = Column(Float)

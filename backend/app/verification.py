@@ -1,5 +1,9 @@
+import json
 from sqlalchemy.orm import Session
 from .models import Company, Person, Evidence
+from .llm import LLMInterface
+from .research.fetcher import WebFetcher
+from .research.extractor import HTMLExtractor
 
 class VerificationBase:
     def __init__(self, db: Session):
@@ -18,18 +22,38 @@ class VerificationBase:
 
 
 class PersonVerificationService(VerificationBase):
+    def __init__(self, db: Session, llm: LLMInterface = None):
+        super().__init__(db)
+        self.llm = llm or LLMInterface()
+
     def verify_identity(self, person: Person) -> float:
         """
-        Determines identity confidence (Phase 7).
-        In a full implementation, this queries LinkedIn or web data.
+        Determines identity confidence (Phase 7) via LLM analysis of available data.
         Returns a confidence score 0.0 - 1.0.
         """
-        confidence = 0.5 # default unknown
-        if person.linkedin_url and person.email:
-            confidence = 0.9
-            self.add_evidence("Person", person.id, "LinkedIn and Email provided", 0.9)
-        elif person.linkedin_url:
-            confidence = 0.8
+        prompt = f"""
+        Analyze the identity of this person: {person.name}.
+        Title: {person.title}
+        Email: {person.email}
+        LinkedIn: {person.linkedin_url}
+        Company ID: {person.company_id}
+
+        Determine if this is a real, verifiable identity. Return a JSON with:
+        - confidence: a float from 0.0 to 1.0.
+        - reasoning: string explanation.
+        """
+
+        try:
+            result = self.llm.generate_json(prompt)
+            confidence = float(result.get("confidence", 0.5))
+            self.add_evidence("Person", person.id, result.get("reasoning", "LLM determined confidence"), confidence, source="LLM")
+        except Exception:
+            # Fallback logic
+            confidence = 0.5
+            if person.linkedin_url and person.email:
+                confidence = 0.9
+            elif person.linkedin_url:
+                confidence = 0.8
 
         person.identity_confidence = confidence
         self.db.commit()
