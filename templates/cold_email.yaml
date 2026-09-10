@@ -1,0 +1,12 @@
+subject: "Exploring backend internship opportunities at {company_name}"
+body: |
+  Hi {contact_name},
+
+  I noticed that {company_name} is working on {company_focus} and recently {company_recent_activity}.
+
+  Given my experience with {matching_skill_1} and {matching_skill_2} on my project {project_name}, I'm very interested in the {role_name} role.
+
+  Would you have 10 minutes next week to chat about the engineering team?
+
+  Best,
+  {my_name}

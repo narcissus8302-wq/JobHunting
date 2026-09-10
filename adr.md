@@ -41,6 +41,11 @@ The Internship Intelligence Agent aims to automate the discovery, verification, 
 6. **Web Research**: Playwright + BeautifulSoup
    - *Why*: Playwright can render JS-heavy pages (crucial for modern startup websites), while BeautifulSoup handles lightweight static parsing.
 
+## Implementation Modularity
+1. **Core Domains**: The backend is strictly segregated into domains matching the spec: `research` (fetching/extracting), `intelligence` (company logic/discovery), and `personalization` (LLM matching/communications).
+2. **LLM Abstraction**: All LLM calls route through a single `LLMInterface` stub (`app/llm.py`), ensuring the underlying API (Gemini/OpenRouter) can be swapped out globally without touching business logic.
+3. **Data Localization**: Candidate skills, projects, and templates are stored as standard `.yaml` files in `candidate/` and `templates/` for explicit human curation rather than database obscurity.
+
 ## Pipeline Optimization Strategy
 - *Decision*: Execute cheap operations (parsing, deductive resolution, basic filtering) before expensive operations (deep web scraping, LLM analysis, resume generation).
 - *Impact*: Keeps local compute requirements reasonable and processing times down.
