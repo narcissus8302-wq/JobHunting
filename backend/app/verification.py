@@ -85,26 +85,58 @@ class PersonVerificationService(VerificationBase):
 
 
 class CompanyVerificationService(VerificationBase):
-    def verify_company(self, company: Company) -> float:
+    def __init__(self, db: Session, llm: LLMInterface = None):
+        super().__init__(db)
+        self.llm = llm or LLMInterface()
+
+    def verify_company(self, company: Company, website_text: str = None) -> float:
         """
-        Verify legitimacy (Phase 9).
+        Verify legitimacy (Phase 9). Uses explicitly extracted website text.
         """
         score = 0.0
 
         if company.website:
-            score += 0.4
+            score += 0.2
             self.add_evidence("Company", company.id, "Website exists", 0.9)
 
-        if company.linkedin_url:
+        if website_text:
+            prompt = f"""
+            Analyze this raw website text for a company named '{company.name}'.
+            Does this appear to be a legitimate, active company with identifiable team members and current activity?
+            Return a JSON with:
+            - is_legitimate: boolean
+            - team_exists: boolean
+            - current_hiring: boolean
+            - reasoning: brief string
+
+            Text: {website_text[:3000]}
+            """
+            try:
+                result = self.llm.generate_json(prompt)
+                if result.get('is_legitimate'):
+                    score += 0.4
+                    self.add_evidence("Company", company.id, result.get("reasoning", "Website content appears legitimate"), 0.8, "LLM")
+                if result.get('team_exists'):
+                    score += 0.2
+                    self.add_evidence("Company", company.id, "Identifiable team exists", 0.8, "LLM")
+                if result.get('current_hiring'):
+                    score += 0.2
+                    self.add_evidence("Company", company.id, "Current hiring activity found", 0.8, "LLM")
+            except Exception:
+                pass
+
+        elif company.linkedin_url:
             score += 0.3
 
         if company.funding_total:
-            score += 0.3
+            score += 0.2
             self.add_evidence("Company", company.id, "Funding confirmed", 0.95)
 
-        company.reliability_score = score
+        # Cap score at 1.0 (or 100 on standard scale)
+        final_score = min(score, 1.0) * 100
+        company.reliability_score = final_score
         self.db.commit()
-        return score
+        return final_score
 
 
 class OpportunityScoringService:
